@@ -11,7 +11,7 @@ freq1 = 'H'
 
 class GetSeries(object):
     """
-    A class to capture an EIA API call and turn it into a pd dataframe
+    Capture an EIA API response for a single series
     """
 
     eia_url = 'http://api.eia.gov/series/'
@@ -29,7 +29,6 @@ class GetSeries(object):
         self.parms = [['api_key', api_key], ['series_id', series_id]]
         self.parms.extend(self.create_optional_parms(kwargs))
         self.response = self.get_response()
-        self.df = ParseEnergyData(self.response.json()).df
 
     def get_response(self):
         '''Calls the EIA API with supplied api_key on init and series_id and return json'''
