@@ -10,90 +10,59 @@ freq1 = 'H'
 
 
 class GetSeries(object):
+    '''
+    Performs a default call to the EIA API and captures the response
+    '''
 
     eia_url = 'http://api.eia.gov/series/'
 
     def __init__(self, **kwargs):
-        self.parms = self.create_optional_parms(kwargs)
-
-    def get_response(self):
-        '''Calls the EIA API with supplied api_key on init and series_id and return json'''
-        api_parms = [tuple(parm) for parm in self.parms]
-        return requests.get(self.eia_url, params=tuple(api_parms))
-
-    def create_parms(self, kwargs):
-        kwargs_list = []
-        try:
-            kwargs_list.append(['api_key', kwargs['api_key']])
-            kwargs_list.append(['series_id', kwargs['series_id']])
-        except:
-            pass
-        return kwargs_list
-
-
-class GetDateRangeSeries(object):
-    """
-    Capture an EIA API response for a single series
-    """
-
-    eia_url = 'http://api.eia.gov/series/'
-
-    def __init__(self, api_key, series_id, **kwargs):
         '''
-        Required parms
-        :param api_key: an API key that is provided by EIA
-        :param series_id: a valid EIA series_id
-        Optional parms to query date range - all 3 must be specified
-        :param start: an optional start date as %Y-%m-%d %H:%M:%S
-        :param end: an optional end date %Y%m%d %H
-        :param freq:  frequency of data valid inputs: 'A', 'M', 'W', 'D', 'H'
+        valid kwargs:
+        :param api_key: an valid API key provided by EIA
+        :param series: a valid EIA series ID
         '''
-        self.parms = [['api_key', api_key], ['series_id', series_id]]
-        self.parms.extend(self.create_optional_parms(kwargs))
+        self.kwargs = kwargs
+        self.parms = self.create_parms()
         self.response = self.get_response()
 
-    def get_response(self):
-        '''Calls the EIA API with supplied api_key on init and series_id and return json'''
-        api_parms = [tuple(parm) for parm in self.parms]
-        return requests.get(self.eia_url, params=tuple(api_parms))
-
-    def create_parms(self, kwargs):
-        '''Return list of formatted start and end date if p freq=rovided'''
-        kwargs_list = []
+    def create_parms(self):
+        '''
+        Convert kwargs into a list to pass into api call
+        '''
         try:
-            kwargs_list.append(['start', self.format_date(kwargs['start'], kwargs['freq'])])
-            kwargs_list.append(['end', self.format_date(kwargs['end'], kwargs['freq'])])
-        except:
+            kwargs_list = [['api_key', self.kwargs['api_key']]]
+            kwargs_list.append(['series_id', self.kwargs['series_id']])
+        except KeyError:
             pass
         return kwargs_list
 
-    def format_date(self, date, freq):
-        '''Formats dates for api call'''
-        date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
-        freq_dict = {'A': '%Y', 'M': '%Y%m', 'W': '%Y%m%d',
-                     'D': '%Y%m%d', 'H': '%Y%m%dT%HZ'}
-        formatted_date = datetime.strftime(date, freq_dict[freq])
-        return formatted_date
+    def get_response(self):
+        '''
+         Calls the EIA API and returns response object
+        '''
+        api_parms = [tuple(parm) for parm in self.parms]
+        return requests.get(self.eia_url, params=api_parms)
 
 
-class ParseEnergyData(object):
+class CreateDataFrame(object):
     '''Creates the dataframe for Energy API call'''
 
     def __init__(self, json):
-        ''':param json: eia json'''
+        """:param json: eia json"""
         self.json = json
         self.series = self.json['series']
         self.data = self.series[0]['data']
         self.df = self.create_dataframe()
 
     def create_dataframe(self):
-        '''Function to create dataframe from json['series']'''
+        """Function to create dataframe from json['series'] """
         values = [x[1] for x in self.data]
         dates = self.get_dates()
         return pd.DataFrame(values, index=dates, columns=['values'])
 
     def get_dates(self):
-        '''Parses text dates to datetime index'''
+        """Parses text dates to datetime index"""
         freq = {'A': '%Y', 'M': '%Y%m', 'W': '%Y%m%d',
                 'D': '%Y%m%d', 'H': '%Y%m%d %H'}
         date_list = []
