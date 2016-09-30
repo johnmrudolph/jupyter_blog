@@ -10,6 +10,28 @@ freq1 = 'H'
 
 
 class GetSeries(object):
+
+    eia_url = 'http://api.eia.gov/series/'
+
+    def __init__(self, **kwargs):
+        self.parms = self.create_optional_parms(kwargs)
+
+    def get_response(self):
+        '''Calls the EIA API with supplied api_key on init and series_id and return json'''
+        api_parms = [tuple(parm) for parm in self.parms]
+        return requests.get(self.eia_url, params=tuple(api_parms))
+
+    def create_parms(self, kwargs):
+        kwargs_list = []
+        try:
+            kwargs_list.append(['api_key', kwargs['api_key']])
+            kwargs_list.append(['series_id', kwargs['series_id']])
+        except:
+            pass
+        return kwargs_list
+
+
+class GetDateRangeSeries(object):
     """
     Capture an EIA API response for a single series
     """
@@ -35,7 +57,7 @@ class GetSeries(object):
         api_parms = [tuple(parm) for parm in self.parms]
         return requests.get(self.eia_url, params=tuple(api_parms))
 
-    def create_optional_parms(self, kwargs):
+    def create_parms(self, kwargs):
         '''Return list of formatted start and end date if p freq=rovided'''
         kwargs_list = []
         try:
