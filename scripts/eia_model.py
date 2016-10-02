@@ -25,6 +25,7 @@ class GetSeries(object):
         self.kwargs = kwargs
         self.parms = self.create_parms()
         self.response = self.get_response()
+        self.df = CreateDataFrame(self.response.json()).df
 
     def create_parms(self):
         '''
