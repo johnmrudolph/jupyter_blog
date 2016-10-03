@@ -25,7 +25,7 @@ class GetSeries(object):
         self.kwargs = kwargs
         self.parms = self.create_parms()
         self.response = self.get_response()
-        self.df = CreateDataFrame(self.response.json()).df
+        self.data = CreateDataFrame(self.response.json())
 
     def create_parms(self):
         '''
@@ -60,7 +60,7 @@ class CreateDataFrame(object):
         """Function to create dataframe from json['series'] """
         values = [x[1] for x in self.data]
         dates = self.get_dates()
-        return pd.DataFrame(values, index=dates, columns=['values'])
+        return pd.DataFrame(values, index=dates, columns=[self.series[0]['series_id']])
 
     def get_dates(self):
         """Parses text dates to datetime index"""
