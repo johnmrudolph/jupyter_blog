@@ -11,9 +11,15 @@ freq1 = 'H'
 
 class GetSeries(object):
     '''
-    Performs a default call to the EIA API and captures the response
+    Performs a call to the EIA API based on date range and captures the response
+    valid kwargs:
+        :param api_key: an valid API key provided by EIA
+        :param series: a valid EIA series ID
+        :param start: a start date in '%Y-%m-%d %H:%M:%S' fromat
+        :param end: a end date in '%Y-%m-%d %H:%M:%S' fromat
+        :freq: a valid frequency ('A' : annual, 'M': monthly, 'W': weekly, 
+            'D': daily, 'H': hourly)
     '''
-
     eia_url = 'http://api.eia.gov/series/'
 
     def __init__(self, **kwargs):
@@ -34,9 +40,21 @@ class GetSeries(object):
         try:
             kwargs_list = [['api_key', self.kwargs['api_key']]]
             kwargs_list.append(['series_id', self.kwargs['series_id']])
+            kwargs_list.append(['start', self.format_date(
+                self.kwargs['freq'], self.kwargs['start'])])
+            kwargs_list.append(['end', self.format_date(
+                self.kwargs['freq'], self.kwargs['end'])])
         except KeyError:
             pass
         return kwargs_list
+
+    def format_date(self, freq, date):
+        """formats input dates to correct"""
+        date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+        freq_dict = {'A': '%Y', 'M': '%Y%m', 'W': '%Y%m%d',
+                     'D': '%Y%m%d', 'H': '%Y%m%dT%HZ'}
+        formatted_date = datetime.strftime(date, freq_dict[freq])
+        return formatted_date
 
     def get_response(self):
         '''
