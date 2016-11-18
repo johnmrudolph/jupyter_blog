@@ -2,24 +2,12 @@ import requests
 import pandas as pd
 from datetime import datetime
 
-eia_api = '5F4109570C68FDE20F42C25F5152D879'
-sid = 'EBA.SCL-ALL.D.H'
-start1 = '2016-08-11 01:00:00'
-end1 = '2016-08-11 23:00:00'
-freq1 = 'H'
-
 
 class GetSeries(object):
     '''
-    Performs a call to the EIA API based on date range and captures the response
-    valid kwargs:
-        :param api_key: an valid API key provided by EIA
-        :param series: a valid EIA series ID
-        :param start: a start date in '%Y-%m-%d %H:%M:%S' fromat
-        :param end: a end date in '%Y-%m-%d %H:%M:%S' fromat
-        :freq: a valid frequency ('A' : annual, 'M': monthly, 'W': weekly, 
-            'D': daily, 'H': hourly)
+    Performs a call to the EIA API based on date range and converts to pandas dataframe
     '''
+    
     eia_url = 'http://api.eia.gov/series/'
 
     def __init__(self, **kwargs):
@@ -27,6 +15,10 @@ class GetSeries(object):
         valid kwargs:
         :param api_key: an valid API key provided by EIA
         :param series: a valid EIA series ID
+        :param start: a start date in '%Y-%m-%d %H:%M:%S' fromat
+        :param end: a end date in '%Y-%m-%d %H:%M:%S' fromat
+        :freq: a valid frequency ('A' : annual, 'M': monthly, 'W': weekly, 
+            'D': daily, 'H': hourly)
         '''
         self.kwargs = kwargs
         self.parms = self.create_parms()
